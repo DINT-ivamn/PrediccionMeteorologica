@@ -1,0 +1,113 @@
+﻿<Window x:Class="PrediccionMeteorologica.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PrediccionMeteorologica"
+        mc:Ignorable="d"
+        Title="Predicción Meteorológica" Height="450" Width="800" Icon="Recursos/sun_weather.ico"
+        MinHeight="550" MinWidth="825">
+    <Window.Resources>
+        <local:ImagenConverter x:Key="ImagenConverter"/>
+        <local:CelsiusConverter x:Key="CelsiusConverter"/>
+        <ControlTemplate x:Key="TextBoxRedondeadoControlTemplate" TargetType="{x:Type TextBox}">
+            <Border x:Name="border" CornerRadius="5" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" TargetName="border" Value="0.56"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF7EB4EA"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF569DE5"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <Style TargetType="{x:Type TextBlock}" x:Key="Titulo">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#FFFFF7F7"/>
+            <Setter Property="FontSize" Value="48"/>
+            <Setter Property="FontFamily" Value="Segoe UI Black"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type Image}" x:Key="ImagenPrincipal">
+            <Setter Property="Source" Value="Recursos/newyork1.jpg"/>
+            <Setter Property="Stretch" Value="Fill"/>
+            <Setter Property="Margin" Value="10,0,0,10"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Source" Value="Recursos/newyork2.jpg"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="{x:Type TextBlock}" x:Key="TextoInformativoEnImagen">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="{x:Type TextBlock}" x:Key="TextoInformativoEnImagenNegrita" BasedOn="{StaticResource TextoInformativoEnImagen}">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Margin" Value="20,5,0,5"/>
+            <Setter Property="Template" Value="{DynamicResource TextBoxRedondeadoControlTemplate}"/>
+        </Style>
+        <DataTemplate DataType="{x:Type local:PrediccionDia}">
+            <DockPanel Background="#FFE8E6FF" Margin="2" Width="100" Height="100">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextoInformativoEnImagenNegrita}" Text="{Binding Dia}"/>
+                <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource TextoInformativoEnImagen}">
+                <Run Text="{Binding MaximaFarenheit, Converter={StaticResource CelsiusConverter}}"/>
+                <Run Text="°"/>
+                <Run Text=" / "/>
+                <Run Text="{Binding MinimaFarenheit, Converter={StaticResource CelsiusConverter}}"/>
+                <Run Text="°"/>
+                </TextBlock>
+                <Image Source="{Binding Prediccion, Converter={StaticResource ImagenConverter}}"/>
+            </DockPanel>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid x:Name="ContenedorPrincipalGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Border BorderBrush="#FFA4A4A4" BorderThickness="0.5">
+                <ListBox x:Name="DiasListBox" ItemsSource="{Binding}"/>
+            </Border>
+        </ScrollViewer>
+        <DockPanel Grid.Column="1" LastChildFill="True">
+            <TextBlock DockPanel.Dock="Top" Text="El tiempo en Nueva York" Style="{StaticResource Titulo}"/>
+            <Grid DockPanel.Dock="Bottom" Margin="10,5,10,5" DataContext="{Binding ElementName=DiasListBox, Path=SelectedItem}">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" Text="Día"/>
+                <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Text="Predicción"/>
+                <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Text="Mínima (F)"/>
+                <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="3" Text="Máxima (F)"/>
+                <TextBox Grid.Column="1" Grid.Row="0"
+                         Text="{Binding Path=Dia, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Column="1" Grid.Row="1"
+                         Text="{Binding Path=Prediccion, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Column="1" Grid.Row="2"
+                         Text="{Binding Path=MinimaFarenheit, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Column="1" Grid.Row="3"
+                         Text="{Binding Path=MaximaFarenheit, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+            <Image Style="{StaticResource ImagenPrincipal}"/>
+        </DockPanel>
+    </Grid>
+</Window>
